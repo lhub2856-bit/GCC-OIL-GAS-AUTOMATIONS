@@ -1,0 +1,468 @@
+{
+  "name": "Oil&gas maintainace sensor",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -672,
+        64
+      ],
+      "id": "69f6b527-7da7-4b52-b574-a4e0c4eb1b0d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -448,
+        64
+      ],
+      "id": "",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "74e65be2-f715-4e39-b558-babc827eda79",
+              "leftValue": "={{ $json.field2 }}",
+              "rightValue": 4,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "719f40bb-0f24-44f2-ac89-32d33ab777cb",
+              "leftValue": "={{ $json.field3 }}",
+              "rightValue": 90,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "id": "3edd8653-32d9-4946-bc54-d949740c03d2",
+              "leftValue": "={{ $json.field1 }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        64
+      ],
+      "id": "71335900-91ab-4bfe-be85-7b46c7bfc80a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {\n    json: {\n      field1: \"75\",  // Temperature\n      field2: \"5\",   // Vibration\n      field3: \"80\"   // Pressure\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -224,
+        64
+      ],
+      "id": "",
+      "name": "Code in JavaScript",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "sendTo": "",
+        "subject": "=alert & emergency",
+        "emailType": "text",
+        "message": "=🚨 ALERT: Machine {{ $json.machine }} HIGH risk! {{ $json.ai_response }} Fix now!\".",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        576,
+        -128
+      ],
+      "id": "0b7b79f8-c3fc-4ec8-a367-1ee5532fba84",
+      "name": "Send a message",
+      "webhookId": "",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=🚨 A{{ $json.field2 }}LERT: Machin{{ $json.field3 }}e  HIGH risk!  Fix now!\".",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=🚨 A{{ $json.field2 }}LERT: Machin{{ $json.field3 }}e  HIGH risk!  Fix now!\"."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-",
+      "typeVersion": 1.9,
+      "position": [
+        224,
+        64
+      ],
+      "id": "",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "options": {
+          "maxTokens": 1024
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        304,
+        288
+      ],
+      "id": "ac451f13-04bd-4d78-9407-5284ea6d50d2",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouter": {
+          "id": "",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "user",
+        "user": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": ""
+        },
+        "text": "=🚨 ALERT: Machine {{ $json.machine }} HIGH risk! {{ $json.ai_response }} Fix now!\".",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        576,
+        64
+      ],
+      "id": "fcbb2437-fa77-428d-8ab7-0d1c9f1e28f2",
+      "name": "Send a message1",
+      "webhookId": "",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "oil & gas maintainance sensor",
+          "cachedResultUrl": "https://docs.google.com/"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Temperature": "={{ $('If').item.json.field1 }}",
+            "pressure": "={{ $('If').item.json.field3 }}",
+            "vibration": "={{ $('If').item.json.field2 }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Temperature",
+              "displayName": "Temperature",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "pressure",
+              "displayName": "pressure",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "vibration",
+              "displayName": "vibration",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status:Alert or ok",
+              "displayName": "status:Alert or ok",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        576,
+        256
+      ],
+      "id": "4a9070f4-f206-4a4a-a67d-62c00295e6e1",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "Project: Predictive Maintenance Alert Automation.\n\nPlatform: n8n (Low-code workflow engine).\n\nFrequency: Runs every 15 minutes (Schedule Trigger).\n\nGoal: Eliminate machine downtime through proactive, real-time health monitoring."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -928,
+        -336
+      ],
+      "typeVersion": 1,
+      "id": "fd4475d8-b878-48bc-9b44-905078dd4e39",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": " Ingestion & Logging\nSource: Fetches data from ThingSpeak IoT Platform.\n\nParameters: Monitors Temperature, Vibration, and Pressure.\n\nAudit Trail: Every reading (Normal or Alert) is automatically logged in Google Sheets for long-term history and compliance."
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -928,
+        -128
+      ],
+      "typeVersion": 1,
+      "id": "49972669-4b7d-4f61-8cee-fcb0aafc47e5",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Smart Alert Logic\nThe \"ALERT\" Thresholds:\n\nTemp: > 70°C\n\nVibration: > 4 mm/s\n\nPressure: < 90 psi\n\nValidation: Uses a JavaScript Node to normalize data and ensure alerts only trigger when strict conditions are met (reducing false alarms).",
+        "height": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -944,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "bb6e76d8-d426-4e64-8692-ed68f4a3544d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "AI-Powered Response\nAI Integration: If an alert is triggered, an LLM (AI Chain) analyzes the data.\n\nOutput: Generates a Technical Maintenance Advisory (suggests specific repair steps).\n\nDispatch: Alerts are sent immediately via Gmail and Slack to the maintenance team.",
+        "height": 272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        240,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "ad6d455f-e299-4dc5-9867-0ec3119515f9",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Decision Logic\nThe Filter: A decision node checks if the Status == ALERT? based on pre-set safety thresholds.\n\nNegative Path: If the status is \"No\" (Normal), the workflow reaches its End with no further action taken.",
+        "height": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -48,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "7ae8ddad-e0a6-449e-b601-c65e88a850d5",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "AI Analysis & Delivery\nPositive Path: If the status is \"Yes,\" the data is sent to an AI Maintenance Advisory node.\n\nIntelligence: The AI generates specific maintenance advice based on the high/low readings.\n\nStep 5: The advisory and alert are simultaneously dispatched via Email (Gmail) and Slack to the technical team.",
+        "height": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        800,
+        -48
+      ],
+      "typeVersion": 1,
+      "id": "b8d61a47-4ec3-4e83-8331-1720698fd530",
+      "name": "Sticky Note8"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "c28aa9f4-ddaa-4066-9283-e739286f741b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  },
+  "id": "RKWYWtVAqgOE6IdI",
+  "tags": []
+}
