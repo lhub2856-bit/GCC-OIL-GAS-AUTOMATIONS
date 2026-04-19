@@ -1,0 +1,99 @@
+{
+  "name": "Error handler",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        0
+      ],
+      "id": "",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "sendTo": "",
+        "subject": "error in system",
+        "emailType": "text",
+        "message": "\"🚨 Workflow fail! Machine check ruk gaya\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "",
+      "name": "Send a message",
+      "webhookId": "",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "The \"Error Trigger\" Node\nWhat it does: This is the starting point of the error workflow. It doesn't wait for a schedule; it only \"wakes up\" when your main Oil & Gas Maintenance workflow crashes.\n\nInformation it carries: It automatically grabs the Node Name that failed and the Error Message (e.g., \"Authentication failed\").",
+        "height": 416,
+        "width": 160,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "b043237a-a332-4655-aa1b-8b293fa71a93",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "The \"Gmail\" (Error Alert) Node\nWhat it does: It sends a specific email to you (not the maintenance team) to let you know the automation is broken.\n\nMessage Body: You usually map the error details here so the email says: \"Hey, the 'Get row(s)' node failed because the sheet was not found.\"",
+        "height": 416,
+        "width": 176,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -176
+      ],
+      "typeVersion": 1,
+      "id": "001ee39c-d527-47f3-bff3-9e93ae11fee2",
+      "name": "Sticky Note1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b3266b58-0c20-48bb-81ef-e5c555a4167b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  },
+  "id": "sp8Jz8Dv996T3Pzd",
+  "tags": []
+}
