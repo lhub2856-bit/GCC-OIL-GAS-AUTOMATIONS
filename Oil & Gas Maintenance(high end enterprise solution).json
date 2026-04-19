@@ -1,0 +1,550 @@
+{
+  "name": "Oil & Gas Maintenance",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        112,
+        -256
+      ],
+      "id": "f03c6b96-92ac-4f85-904c-14838db60a61",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Item list",
+          "cachedResultUrl": "https://docs.google.com/spreadsheet"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        336,
+        -160
+      ],
+      "id": "7ddf9894-75d0-41af-8400-ef546ee92326",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "",
+        "subject": "emergency",
+        "emailType": "text",
+        "message": "=Alert: Machine Status is {{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2000,
+        -160
+      ],
+      "id": "",
+      "name": "Send a message",
+      "webhookId": "",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1200,
+        -160
+      ],
+      "id": "1cb67c18-d37c-45f7-8a30-7842462aaf98",
+      "name": "Wait",
+      "webhookId": ""
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\"The temperature is {{ $json.Temperature }}. If it's above 80, just say 'CRITICAL'. If not, just say 'NORMAL'. Important: Do not explain anything. Do not use Step 1 or Step 2. Only give me the one-word answer.\"",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes",
+      "typeVersion": 1.9,
+      "position": [
+        1424,
+        -160
+      ],
+      "id": "",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        80
+      ],
+      "id": "",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouter": {
+          "id": "",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "",
+          "mode": "list",
+          "cachedResultName": "Maintenance_History_Log",
+          "cachedResultUrl": "https://docs.google.com"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1561923757,
+          "mode": "list",
+          "cachedResultName": "n8n-sheet",
+          "cachedResultUrl": "https://docs.google.com"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "text": "=Field Name (Left Box),Value (Right Box Expression) Timestamp,{{ $('Get row(s) in sheet').item.json.Timestamp }} Machine_ID,{{ $('Get row(s) in sheet').item.json.Machine_ID }} Temperature,{{ $('Get row(s) in sheet').item.json.Temperature }} Status,{{ $json.text }}"
+          },
+          "matchingColumns": [
+            "text"
+          ],
+          "schema": [
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1776,
+        -160
+      ],
+      "id": "",
+      "name": "Maintenance_History_Log",
+      "credentials": {
+        "googleSheetsOAuth2": {
+          "id": "",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        -64
+      ],
+      "id": "892ce841-a5cf-4759-95e5-e2397c235cf2",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "",
+              "leftValue": "={{ $json.Temperature }}",
+              "rightValue": 75,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        976,
+        -144
+      ],
+      "id": "",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "Machine_Name, Temperature",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        544,
+        -160
+      ],
+      "id": "",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        752,
+        -160
+      ],
+      "id": "54f6f39b-e7d5-4211-ba6d-94293fdeeecf",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "content": "This is your manual \"Start\" button for testing.\n\nSchedule Trigger: This is your automation timer. It tells n8n to check your Google Sheet automatically at specific times (e.g., every hour).",
+        "height": 624,
+        "width": 214,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        48,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "a2ed5b62-3ccf-463b-9384-a8160c957c7f",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "This node goes into your Google Sheet and pulls all the temperature data for your machines into n8n.",
+        "height": 624,
+        "width": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        272,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "2c3765d9-c2b1-4a89-b293-0345cd6950ec",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Data Organization\nSplit Out: Since your data is in different columns (Machine1_Temp, Machine2_Temp), this node converts those columns into individual \"items.\" It tells n8n, \"Don't look at everything at once; treat each machine as a separate task.",
+        "height": 608,
+        "width": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        512,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "17b8bed4-b5fa-4508-bfa4-dd9f6131abc9",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "The Manager (Looping)\nLoop Over Items: This node acts like a conveyor belt. It picks up Machine 1, sends it through the check, waits for it to finish, then picks up Machine 2, and so on.",
+        "height": 608,
+        "width": 192,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        752,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "53171a4c-a9ea-4dc8-9d42-54d96174335b",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "The Decision Maker\nIf1: This is the \"Brain.\" It checks the condition: Is the Temperature > 80?\n\nFalse Path: If the temperature is safe, it sends the workflow back to the Loop to check the next machine.\n\nTrue Path: If the temperature is too high, it triggers the emergency alert sequence.",
+        "height": 592,
+        "width": 192,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "90a9ba58-c987-4e42-baac-d5009f8f81e5",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "Alert Processing\nWait: It pauses for 30 seconds to prevent sending too many emails too quickly.",
+        "height": 592,
+        "width": 176,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1168,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "56d9bd69-4969-4951-8106-fc658b97e39c",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "Basic LLM Chain (AI): It takes the temperature and decides if the status is 'CRITICAL' or 'NORMAL' to give you a smart response.",
+        "height": 592,
+        "width": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1424,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "41eea95f-e6c8-4138-905b-080b1c265be6",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "Maintenance_History_Log: It writes an entry back to your Google Sheet to keep a record of which machine overheated and when.",
+        "height": 592,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1696,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "dce02720-6e2c-4f09-82fd-b3db2070b7af",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "Final Action\nSend a message (Gmail): This node sends the actual \"Emergency Alert\" email to your inbox. Once the email is sent, the connection goes back to the Loop to check the remaining machines.",
+        "height": 592,
+        "width": 192,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1952,
+        -544
+      ],
+      "typeVersion": 1,
+      "id": "194143e5-0848-40fb-adb3-96685441bebf",
+      "name": "Sticky Note8"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Maintenance_History_Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Maintenance_History_Log": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "callerPolicy": ""
+  },
+  "versionId": "d3197413-1d0a-4f9e-9ca4-079fa3f1cc45",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": ""
+  },
+  "id": "40LDTB9sirDaOUC0",
+  "tags": []
+}
